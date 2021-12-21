@@ -1,3 +1,20 @@
+from config import *
+
+map_type = {
+    'border': 'border',
+    'temperature': 't',
+    'wind': 'ws',
+    'pressure': 'p_mm',
+}
+
+url_type = {
+    'border': border_url,
+    'temperature': temperature_url,
+    'wind': wind_url,
+    'pressure': pressure_url,
+}
+
+
 def timer(fun):
     import time
 
@@ -24,15 +41,15 @@ def chrome_dev_tools_network(url, headless=True, filter=None):
 
     driver.get(url)
     if filter:
-        log = [item for item in driver.get_log('performance') if filter in str(item)]
+        logs = [item for item in driver.get_log('performance') if filter in str(item)]
     else:
-        log = driver.get_log('performance')
+        logs = driver.get_log('performance')
     driver.close()
 
-    return log
+    return logs
 
 
-def extract_token(logs):
+def extract_token(map_t, logs):
     import json
 
     for log in logs:
@@ -41,9 +58,14 @@ def extract_token(logs):
             params = j['message']['params']
             if params['type'] == 'Image':
                 url = params['request']['url']
-                if url[-4:] == 'jpeg':
-                    token = "/" + "/".join(url.split('/')[-4:-2])
-                    return token
+                if map_t == 'border':
+                    if url.split('/')[3] == 'border' and url[-3:] == 'png':
+                        token = "/".join(url.split('/')[-4:-2])
+                        return token
+                else:
+                    if url.split('/')[3] == map_t and url[-4:] == 'jpeg':
+                        token = "/".join(url.split('/')[-4:-2])
+                        return token
         except Exception:
             pass
     return None
