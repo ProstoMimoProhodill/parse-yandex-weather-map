@@ -1,4 +1,6 @@
 import os
+import time
+
 import cv2 as cv
 import requests
 import matplotlib.pyplot as plt
@@ -139,8 +141,9 @@ class WeatherMap:
             merge_h = cv.hconcat(h)
             merge_h_v.append(merge_h)
 
+        id = "".join(list(map(str, time.localtime()[:6])))
         if border:
-            path = f'./{map_t}-{deep}-border.png'
+            path = f'./{id}-{map_t}-{deep}-b.png'
             overlay = cv.addWeighted(merge_h_v[0], 0.9, merge_h_v[1], 0.1, 0.1)
             if grid:
                 for x in range(512, overlay.shape[1], 512):
@@ -148,6 +151,7 @@ class WeatherMap:
                 for y in range(512, overlay.shape[0], 512):
                     img = cv.line(overlay, (0, y), (overlay.shape[0], y), (0, 0, 0), 5)
                 overlay = img
+                path = f'./{id}-{map_t}-{deep}-bg.png'
             cv.imwrite(path, overlay)
         else:
             path = f'./{map_t}-{deep}.png'
@@ -155,7 +159,8 @@ class WeatherMap:
                 for x in range(512,  merge_h_v[0].shape[1], 512):
                     img = cv.line(merge_h_v[0], (x, 0), (x,  merge_h_v[0].shape[1]), (0, 0, 0), 5)
                 for y in range(512,  merge_h_v[0].shape[0], 512):
-                    img = cv.line( merge_h_v[0], (0, y), ( merge_h_v[0].shape[0], y), (0, 0, 0), 5)
+                    img = cv.line(merge_h_v[0], (0, y), (merge_h_v[0].shape[0], y), (0, 0, 0), 5)
                 merge_h_v[0] = img
+                path = f'./{id}-{map_t}-{deep}-g.png'
             cv.imwrite(path, merge_h_v[0])
         return path
